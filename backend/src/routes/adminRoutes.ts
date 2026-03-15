@@ -1,0 +1,16 @@
+import { Router } from 'express'
+
+import { AdminController } from '../controllers/adminController.js'
+import { requireAdmin, requireAuth } from '../middleware/auth.middleware.js'
+import { adminRateLimiter } from '../middleware/rateLimit.middleware.js'
+import { validateRequest } from '../middleware/validate.middleware.js'
+import { adminQuerySchema, documentIdParamSchema } from '../validators/document.validator.js'
+
+const router = Router()
+const adminController = new AdminController()
+
+router.use(requireAuth, requireAdmin, adminRateLimiter)
+router.get('/documents', validateRequest({ query: adminQuerySchema }), adminController.listDocuments)
+router.delete('/documents/:id', validateRequest({ params: documentIdParamSchema }), adminController.deleteDocument)
+
+export default router

@@ -4,7 +4,7 @@ VerifyO is a high-security, full-stack application designed to provide cryptogra
 
 ## 📺 Project Demo
 
-<video src="https://github.com/bubblu2264326/verifyO/blob/main/Demo.mp4?raw=true" controls="controls" style="max-width: 100%;">
+<video src="Demo.mp4" controls="controls" style="max-width: 100%;">
   Your browser does not support the video tag.
 </video>
 

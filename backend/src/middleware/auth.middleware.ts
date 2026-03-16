@@ -10,6 +10,13 @@ type TokenPayload = {
   role: 'USER' | 'ADMIN'
 }
 
+function isTokenPayload(payload: unknown): payload is TokenPayload {
+  if (!payload || typeof payload !== 'object') return false
+  const record = payload as Record<string, unknown>
+  if (typeof record.userId !== 'string') return false
+  return record.role === 'USER' || record.role === 'ADMIN'
+}
+
 export function requireAuth(req: Request, _res: Response, next: NextFunction): void {
   try {
     const cookies = parseCookies(req.headers.cookie)
@@ -19,7 +26,10 @@ export function requireAuth(req: Request, _res: Response, next: NextFunction): v
       throw new ApiError(401, 'Authentication required', 'AUTH_REQUIRED')
     }
 
-    const payload = jwt.verify(token, env.jwtSecret) as TokenPayload
+    const payload = jwt.verify(token, env.jwtSecret, { algorithms: ['HS256'] })
+    if (!isTokenPayload(payload)) {
+      throw new ApiError(401, 'Invalid authentication token', 'INVALID_TOKEN')
+    }
     req.auth = {
       userId: payload.userId,
       role: payload.role,

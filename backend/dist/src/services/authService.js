@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { env, getEnv } from '../config/env.js';
+import { env } from '../config/env.js';
 import { UserRepository } from '../repositories/UserRepository.js';
 import { ApiError } from '../utils/apiError.js';
 export class AuthService {
@@ -18,7 +18,13 @@ export class AuthService {
             email,
             password: hashedPassword,
         });
-        return this.toSafeUser(user);
+        const token = jwt.sign({ userId: user.id, role: user.role }, env.jwtSecret, {
+            expiresIn: env.jwtExpiresIn,
+        });
+        return {
+            user: this.toSafeUser(user),
+            token,
+        };
     }
     async authenticate(email, password) {
         const user = await this.userRepository.findByEmail(email);
@@ -42,15 +48,6 @@ export class AuthService {
         if (!user) {
             throw new ApiError(401, 'Authentication required', 'AUTH_REQUIRED');
         }
-        return this.toSafeUser(user);
-    }
-    async bootstrapAdmin() {
-        const runtimeEnv = getEnv();
-        if (!runtimeEnv.adminEmail || !runtimeEnv.adminPassword) {
-            return null;
-        }
-        const hashedPassword = await bcrypt.hash(runtimeEnv.adminPassword, runtimeEnv.bcryptSaltRounds);
-        const user = await this.userRepository.upsertAdmin(runtimeEnv.adminEmail, hashedPassword);
         return this.toSafeUser(user);
     }
     toSafeUser(user) {

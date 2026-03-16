@@ -18,6 +18,7 @@ export class DocumentController extends BaseController {
 
       const document = await this.documentService.uploadDocument({
         userId,
+        isAdmin: req.auth?.role === 'ADMIN',
         file: req.file,
         clientHash: req.body.clientHash,
       })
@@ -38,6 +39,25 @@ export class DocumentController extends BaseController {
       })
 
       this.ok(res, verification)
+    } catch (error) {
+      this.fail(next, error)
+    }
+  }
+
+  checkHash = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.auth?.userId
+      if (!userId) {
+        throw new ApiError(401, 'Authentication required', 'AUTH_REQUIRED')
+      }
+
+      await this.documentService.checkDuplicateHash(
+        userId,
+        req.body.clientHash,
+        req.auth?.role === 'ADMIN'
+      )
+
+      this.ok(res, { message: 'Hash is clean' })
     } catch (error) {
       this.fail(next, error)
     }

@@ -1,5 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readdir } from 'node:fs/promises'
+import { resolve } from 'node:path'
 
 import prisma from '../src/config/db.js'
 import { bootstrapAdminUser } from '../src/scripts/bootstrapAdmin.js'
@@ -21,14 +23,18 @@ test('documents upload, verify, duplicate hashes, and admin controls work', asyn
     const secondUserCookie = await registerAndLogin(server.baseUrl, 'second@example.com')
     const adminCookie = await login(server.baseUrl, 'admin@example.com', 'AdminPassword123!')
 
-    const fileBuffer = Buffer.from('duplicate document')
+    const fileBuffer = Buffer.concat([Buffer.from('%PDF-1.4\n'), Buffer.from('duplicate document')])
     const clientHash = await generateSha256FromBuffer(fileBuffer)
 
     const firstUploadResponse = await uploadDocument(server.baseUrl, firstUserCookie, fileBuffer, clientHash)
     assert.equal(firstUploadResponse.status, 201)
+    const firstUploadPayload = await firstUploadResponse.json()
 
     const secondUploadResponse = await uploadDocument(server.baseUrl, secondUserCookie, fileBuffer, clientHash)
     assert.equal(secondUploadResponse.status, 201)
+    const secondUploadPayload = await secondUploadResponse.json()
+
+    assert.equal(firstUploadPayload.document.storagePath, secondUploadPayload.document.storagePath)
 
     const verifyForm = new FormData()
     verifyForm.append(
@@ -69,6 +75,32 @@ test('documents upload, verify, duplicate hashes, and admin controls work', asyn
       where: { fileHash: clientHash },
     })
     assert.equal(remainingDocuments.length, 1)
+  } finally {
+    await server.close()
+  }
+})
+
+test('documents reject spoofed pdf uploads by signature', async () => {
+  const server = await startTestServer()
+
+  const uploadsDir = resolve(process.cwd(), 'uploads', 'documents')
+
+  try {
+    const userCookie = await registerAndLogin(server.baseUrl, 'user@example.com')
+
+    const before = new Set(await readdir(uploadsDir))
+
+    const fileBuffer = Buffer.from('not a pdf')
+    const clientHash = await generateSha256FromBuffer(fileBuffer)
+
+    const response = await uploadDocument(server.baseUrl, userCookie, fileBuffer, clientHash)
+    assert.equal(response.status, 400)
+
+    const payload = await response.json()
+    assert.equal(payload.code, 'INVALID_FILE_SIGNATURE')
+
+    const after = new Set(await readdir(uploadsDir))
+    assert.deepEqual(after, before)
   } finally {
     await server.close()
   }

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import { globalRateLimiter } from './middleware/rateLimit.middleware.js';
@@ -14,6 +15,8 @@ export function createApp() {
         credentials: true,
     }));
     app.use(helmet());
+    //app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'))
+    app.use(morgan('combined'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(globalRateLimiter);

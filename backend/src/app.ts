@@ -19,7 +19,8 @@ export function createApp() {
     }),
   )
   app.use(helmet())
-  app.use(morgan('dev'))
+  //app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'))
+  app.use(morgan('combined'))
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use(globalRateLimiter)

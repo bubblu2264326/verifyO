@@ -1,4 +1,5 @@
 import { promises as fs } from 'node:fs'
+import path from 'node:path'
 
 export async function safeUnlink(filePath: string): Promise<void> {
   try {
@@ -9,4 +10,9 @@ export async function safeUnlink(filePath: string): Promise<void> {
       throw error
     }
   }
+}
+
+export function isPathInsideDirectory(directoryPath: string, filePath: string): boolean {
+  const relative = path.relative(directoryPath, filePath)
+  return relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative)
 }

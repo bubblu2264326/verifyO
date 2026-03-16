@@ -13,7 +13,12 @@ export function parseCookies(headerValue?: string): Record<string, string> {
         return cookies
       }
 
-      cookies[name] = decodeURIComponent(valueParts.join('='))
+      const rawValue = valueParts.join('=')
+      try {
+        cookies[name] = decodeURIComponent(rawValue)
+      } catch {
+        cookies[name] = rawValue
+      }
       return cookies
     }, {})
 }

@@ -6,12 +6,22 @@ export class DocumentRepository {
     create(data) {
         return prisma.document.create({ data });
     }
+    findExistingStoragePathByHash(fileHash) {
+        return prisma.document.findFirst({
+            where: { fileHash },
+            select: { storagePath: true },
+            orderBy: { createdAt: 'asc' },
+        });
+    }
     findByHash(fileHash) {
         return prisma.document.findMany({
             where: { fileHash },
             include: documentWithUserInclude,
             orderBy: { createdAt: 'desc' },
         });
+    }
+    countByStoragePath(storagePath) {
+        return prisma.document.count({ where: { storagePath } });
     }
     findById(id) {
         return prisma.document.findUnique({

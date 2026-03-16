@@ -1,4 +1,3 @@
-import path from 'node:path';
 import dotenv from 'dotenv';
 import { z } from 'zod';
 dotenv.config();
@@ -11,9 +10,10 @@ const envSchema = z.object({
     JWT_EXPIRES_IN: z.string().default('1d'),
     COOKIE_NAME: z.string().default('verifyo_token'),
     BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(8).max(14).default(12),
-    MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().max(25).default(5),
-    ADMIN_EMAIL: z.string().email().optional(),
-    ADMIN_PASSWORD: z.string().min(12).optional(),
+    MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().max(100).default(100),
+    SUPABASE_URL: z.string().url(),
+    SUPABASE_SERVICE_KEY: z.string().min(1),
+    SUPABASE_BUCKET: z.string().default('documents'),
 });
 export function getEnv() {
     const parsed = envSchema.safeParse(process.env);
@@ -31,9 +31,11 @@ export function getEnv() {
         cookieName: data.COOKIE_NAME,
         bcryptSaltRounds: data.BCRYPT_SALT_ROUNDS,
         maxUploadSizeBytes: data.MAX_UPLOAD_SIZE_MB * 1024 * 1024,
-        uploadsDirectory: path.resolve(process.cwd(), 'uploads', 'documents'),
-        adminEmail: data.ADMIN_EMAIL,
-        adminPassword: data.ADMIN_PASSWORD,
+        supabase: {
+            url: data.SUPABASE_URL,
+            serviceKey: data.SUPABASE_SERVICE_KEY,
+            bucket: data.SUPABASE_BUCKET,
+        },
     };
 }
 export const env = getEnv();

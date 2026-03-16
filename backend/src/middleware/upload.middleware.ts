@@ -1,25 +1,11 @@
-import { mkdirSync } from 'node:fs'
-import path from 'node:path'
-
 import multer from 'multer'
-
 import { env } from '../config/env.js'
 import { ApiError } from '../utils/apiError.js'
 
-mkdirSync(env.uploadsDirectory, { recursive: true })
-
 const allowedMimeTypes = new Set(['application/pdf', 'image/png', 'image/jpeg'])
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, callback) => {
-    callback(null, env.uploadsDirectory)
-  },
-  filename: (_req, file, callback) => {
-    const timestamp = Date.now()
-    const safeFileName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_')
-    callback(null, `${timestamp}-${safeFileName}`)
-  },
-})
+// Use memory storage for cloud-native handling (no local disk writes)
+const storage = multer.memoryStorage()
 
 export const uploadDocumentMiddleware = multer({
   storage,

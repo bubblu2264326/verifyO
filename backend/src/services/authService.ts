@@ -14,7 +14,7 @@ type SafeUser = {
 export class AuthService {
   constructor(private readonly userRepository = new UserRepository()) {}
 
-  async register(email: string, password: string): Promise<SafeUser> {
+  async register(email: string, password: string): Promise<{ user: SafeUser; token: string }> {
     const existingUser = await this.userRepository.findByEmail(email)
     if (existingUser) {
       throw new ApiError(409, 'User already exists', 'USER_EXISTS')
@@ -26,7 +26,14 @@ export class AuthService {
       password: hashedPassword,
     })
 
-    return this.toSafeUser(user)
+    const token = jwt.sign({ userId: user.id, role: user.role }, env.jwtSecret, {
+      expiresIn: env.jwtExpiresIn as SignOptions['expiresIn'],
+    })
+
+    return {
+      user: this.toSafeUser(user),
+      token,
+    }
   }
 
   async authenticate(email: string, password: string): Promise<{ user: SafeUser; token: string }> {

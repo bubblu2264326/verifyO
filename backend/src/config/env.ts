@@ -14,7 +14,10 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('1d'),
   COOKIE_NAME: z.string().default('verifyo_token'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(8).max(14).default(12),
-  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().max(25).default(5),
+  MAX_UPLOAD_SIZE_MB: z.coerce.number().int().positive().max(100).default(100),
+  SUPABASE_URL: z.string().url(),
+  SUPABASE_SERVICE_KEY: z.string().min(1),
+  SUPABASE_BUCKET: z.string().default('documents'),
 })
 
 export function getEnv() {
@@ -36,7 +39,11 @@ export function getEnv() {
     cookieName: data.COOKIE_NAME,
     bcryptSaltRounds: data.BCRYPT_SALT_ROUNDS,
     maxUploadSizeBytes: data.MAX_UPLOAD_SIZE_MB * 1024 * 1024,
-    uploadsDirectory: path.resolve(process.cwd(), 'uploads', 'documents'),
+    supabase: {
+      url: data.SUPABASE_URL,
+      serviceKey: data.SUPABASE_SERVICE_KEY,
+      bucket: data.SUPABASE_BUCKET,
+    },
   }
 }
 

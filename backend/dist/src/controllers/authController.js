@@ -10,7 +10,8 @@ export class AuthController extends BaseController {
     }
     register = async (req, res, next) => {
         try {
-            const user = await this.authService.register(req.body.email, req.body.password);
+            const { user, token } = await this.authService.register(req.body.email, req.body.password);
+            res.cookie(env.cookieName, token, authCookieOptions());
             this.created(res, {
                 message: 'User registered successfully',
                 user,

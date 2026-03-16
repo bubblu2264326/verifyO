@@ -11,7 +11,13 @@ export function parseCookies(headerValue) {
         if (!name || valueParts.length === 0) {
             return cookies;
         }
-        cookies[name] = decodeURIComponent(valueParts.join('='));
+        const rawValue = valueParts.join('=');
+        try {
+            cookies[name] = decodeURIComponent(rawValue);
+        }
+        catch {
+            cookies[name] = rawValue;
+        }
         return cookies;
     }, {});
 }

@@ -5,7 +5,7 @@ import { requireAuth } from '../middleware/auth.middleware.js'
 import { uploadRateLimiter } from '../middleware/rateLimit.middleware.js'
 import { uploadDocumentMiddleware } from '../middleware/upload.middleware.js'
 import { validateRequest } from '../middleware/validate.middleware.js'
-import { uploadDocumentSchema } from '../validators/document.validator.js'
+import { checkHashSchema, uploadDocumentSchema } from '../validators/document.validator.js'
 
 const router = Router()
 const documentController = new DocumentController()
@@ -19,6 +19,7 @@ router.post(
   documentController.upload,
 )
 
+router.post('/check-hash', requireAuth, validateRequest({ body: checkHashSchema }), documentController.checkHash)
 router.post('/verify', requireAuth, uploadRateLimiter, uploadDocumentMiddleware, documentController.verify)
 router.get('/me', requireAuth, documentController.myDocuments)
 

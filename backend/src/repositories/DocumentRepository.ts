@@ -15,12 +15,24 @@ export class DocumentRepository {
     return prisma.document.create({ data })
   }
 
+  findExistingStoragePathByHash(fileHash: string): Promise<{ storagePath: string } | null> {
+    return prisma.document.findFirst({
+      where: { fileHash },
+      select: { storagePath: true },
+      orderBy: { createdAt: 'asc' },
+    })
+  }
+
   findByHash(fileHash: string): Promise<DocumentWithUser[]> {
     return prisma.document.findMany({
       where: { fileHash },
       include: documentWithUserInclude,
       orderBy: { createdAt: 'desc' },
     })
+  }
+
+  countByStoragePath(storagePath: string): Promise<number> {
+    return prisma.document.count({ where: { storagePath } })
   }
 
   findById(id: string): Promise<DocumentWithUser | null> {

@@ -2,6 +2,13 @@
 
 VerifyO is a high-security, full-stack application designed to provide cryptographic "Proof of Existence" for digital documents without compromising user privacy.
 
+## 📺 Project Demo
+
+https://github.com/bubblu2264326/verifyO/blob/main/Demo.mp4?raw=true
+
+> [!NOTE]
+> *The video above demonstrates the full document upload, local hashing, and cloud verification flow.*
+
 This document serves as the central architectural reference for the system, detailing the tech stack, structural organization, and core security decisions.
 
 ---

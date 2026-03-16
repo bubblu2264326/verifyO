@@ -4,9 +4,7 @@ VerifyO is a high-security, full-stack application designed to provide cryptogra
 
 ## 📺 Project Demo
 
-<video src="https://raw.githubusercontent.com/bubblu2264326/verifyO/main/Demo.mp4" controls="controls" style="max-width: 100%;">
-  Your browser does not support the video tag.
-</video>
+https://github.com/user-attachments/assets/a514616d-cfcf-4718-ba5d-f8e57980e24f
 
 > [!NOTE]
 > *The video above demonstrates the full document upload, local hashing, and cloud verification flow.*
